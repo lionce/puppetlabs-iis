@@ -43,5 +43,18 @@ appveyor.yml:
 .gitlab-ci.yml:
   delete: true
 
+.travis.yml:
+  unmanaged: true
+
+appveyor.yml:
+  delete: true
+
+.gitlab-ci.yml:
+  unmanaged: true
+
+.gitignore:
+  required:
+    - ---.project
+
 spec/default_facts.yml:
   unmanaged: true
