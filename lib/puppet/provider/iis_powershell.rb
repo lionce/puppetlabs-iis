@@ -29,30 +29,31 @@ class Puppet::Provider::IIS_PowerShell < Puppet::Provider # rubocop:disable all
   end
 
   def flush
-    if exists?
-      update
-    end
+    update if exists?
+    # if exists?
+    #   update
+    # end
   end
 
-  def self.run(command, check = false)
+  def self.run(command, _check = false)
     Puppet.debug("COMMAND: #{command}")
 
-    if self.ps_major_version == 2
+    if ps_major_version == 2
       # - PowerShell 2.0 does not support autoload of modules therefore we must explicitly add the WebAdministration module
       # - Must change the current location to the be the IIS: provider
       # - Add the ConvertTo-JSON command support
-      command = "Import-Module WebAdministration -ErrorAction Stop\n" +
+      command = "Import-Module WebAdministration -ErrorAction Stop\n" \
                 "cd iis:\n" +
-                ps_script_content('json_1.7', @resource) + "\n" +
+                ps_script_content('json_1.7', @resource) + "\n" \
                 "$ConfirmPreference = 'high'" + "\n" +
                 command
     end
 
     result = ps_manager.execute(command)
 
-    stdout      = result[:stdout]
-    stderr      = result[:stderr]
-    exit_code   = result[:exitcode]
+    # stdout      = result[:stdout]
+    stderr = result[:stderr]
+    # exit_code   = result[:exitcode]
 
     unless stderr.nil?
       stderr.each do |er|
@@ -63,7 +64,7 @@ class Puppet::Provider::IIS_PowerShell < Puppet::Provider # rubocop:disable all
     Puppet.debug "STDOUT: #{result[:stdout]}" unless result[:stdout].nil?
     Puppet.debug "ERRMSG: #{result[:errormessage]}" unless result[:errormessage].nil?
 
-    return result
+    result
   end
 
   def self.ps_manager
@@ -74,18 +75,18 @@ class Puppet::Provider::IIS_PowerShell < Puppet::Provider # rubocop:disable all
   # the PowerShell version does not suddenly change during a Puppet run.
   def self.ps_major_version(do_not_use_cached_value = false)
     if @powershell_major_version.nil? || do_not_use_cached_value
-      version = self.powershell_version
+      version = powershell_version
       @powershell_major_version = version.nil? ? nil : version.split('.').first.to_i
     end
     @powershell_major_version
   end
 
-  PS_ONE_REG_PATH   = 'SOFTWARE\Microsoft\PowerShell\1\PowerShellEngine'
-  PS_THREE_REG_PATH = 'SOFTWARE\Microsoft\PowerShell\3\PowerShellEngine'
-  PS_REG_KEY        = 'PowerShellVersion'
+  PS_ONE_REG_PATH   = 'SOFTWARE\Microsoft\PowerShell\1\PowerShellEngine'.freeze
+  PS_THREE_REG_PATH = 'SOFTWARE\Microsoft\PowerShell\3\PowerShellEngine'.freeze
+  PS_REG_KEY        = 'PowerShellVersion'.freeze
 
   def self.powershell_version
-    Puppet::Util::Platform.windows? ? self.powershell_three_version || self.powershell_one_version : nil
+    Puppet::Util::Platform.windows? ? powershell_three_version || powershell_one_version : nil
   end
 
   def self.powershell_one_version
@@ -120,8 +121,8 @@ class Puppet::Provider::IIS_PowerShell < Puppet::Provider # rubocop:disable all
     return nil if raw.nil?
     # Unfortunately PowerShell tends to automatically insert CRLF characters mid-string (Console Width)
     # However as we're using JSON which does not use Line Endings for termination, we can safely strip them
-    raw.gsub!("\n",'')
-    raw.gsub!("\r",'')
+    raw.delete!("\n")
+    raw.delete!("\r")
 
     result = JSON.parse(raw)
     return nil if result.nil?
@@ -145,7 +146,7 @@ class Puppet::Provider::IIS_PowerShell < Puppet::Provider # rubocop:disable all
       elsif result['Objects'].is_a?(Array)
         return result['Objects']
       else
-        raise "Unable to determine the JSON encoding from PowerShell 2.0"
+        raise 'Unable to determine the JSON encoding from PowerShell 2.0'
       end
     end
 

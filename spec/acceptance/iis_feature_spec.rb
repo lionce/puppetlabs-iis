@@ -2,11 +2,12 @@ require 'spec_helper_acceptance'
 
 describe 'iis_feature' do
   context 'when managing features' do
+    feature = 'Web-Scripting-Tools'
     context 'with default parameters' do
       before(:all) do
-        @feature = 'Web-Scripting-Tools'
-        @manifest  = <<-HERE
-          iis_feature { '#{@feature}':
+        # @feature = 'Web-Scripting-Tools'
+        @manifest = <<-HERE
+          iis_feature { '#{feature}':
             ensure => 'present'
           }
         HERE
@@ -16,17 +17,18 @@ describe 'iis_feature' do
 
       context 'when puppet resource is run' do
         before(:all) do
-          @result = resource('iis_feature', @feature)
+          @result = resource('iis_feature', feature)
         end
-
-        puppet_resource_should_show('ensure', 'present')
+        it 'is present' do
+          puppet_resource_should_show('ensure', 'present')
+        end
       end
     end
 
     context 'with invalid' do
       context 'name parameter defined' do
         before(:all) do
-          @manifest  = <<-HERE
+          @manifest = <<-HERE
           iis_feature { 'Foo':
             ensure => 'present'
           }
@@ -35,7 +37,6 @@ describe 'iis_feature' do
 
         it_behaves_like 'a failing manifest'
       end
-
     end
   end
 end
