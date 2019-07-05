@@ -471,7 +471,7 @@ describe 'iis_site' do
             @result = resource('iis_site', @site_name)
           end
 
-          it 'applicationpool has specific value' do
+          it 'applicationpool has specific value' do
             puppet_resource_should_show('applicationpool', @pool_name)
           end
         end

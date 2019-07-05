@@ -141,13 +141,9 @@ class Puppet::Provider::IIS_PowerShell < Puppet::Provider # rubocop:disable all
 
       # If only a single object is returned then the result is Hash with a single 'Object' key
       # if multiple objects are returned then the result is an array of Hashes
-      if result['Objects'].is_a?(Hash) && result['Objects'].keys[0] == 'Object'
-        return [result['Objects']['Object']]
-      elsif result['Objects'].is_a?(Array)
-        return result['Objects']
-      else
-        raise 'Unable to determine the JSON encoding from PowerShell 2.0'
-      end
+      return [result['Objects']['Object']] if result['Objects'].is_a?(Hash) && result['Objects'].keys[0] == 'Object'
+      return result['Objects'] if result['Objects'].is_a?(Array)
+      raise 'Unable to determine the JSON encoding from PowerShell 2.0'
     end
 
     # Always return an Array type

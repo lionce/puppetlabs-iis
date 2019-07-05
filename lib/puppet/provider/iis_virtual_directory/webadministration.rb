@@ -35,7 +35,9 @@ Puppet::Type.type(:iis_virtual_directory).provide(:webadministration, parent: Pu
     cmd << "-PhysicalPath \"#{@resource[:physicalpath]}\" " if @resource[:physicalpath]
     cmd << '-ErrorAction Stop;'
     cmd << "Set-ItemProperty -Path 'IIS:\\Sites\\#{@resource[:sitename]}\\#{@resource[:name]}' -Name 'userName' -Value '#{@resource[:user_name]}' -ErrorAction Stop;" if @resource[:user_name]
-    cmd << "Set-ItemProperty -Path 'IIS:\\Sites\\#{@resource[:sitename]}\\#{@resource[:name]}' -Name 'password' -Value '#{escape_string(@resource[:password])}' -ErrorAction Stop;" if @resource[:password]
+    if @resource[:password]
+      cmd << "Set-ItemProperty -Path 'IIS:\\Sites\\#{@resource[:sitename]}\\#{@resource[:name]}'/ -Name 'password' -Value '#{escape_string(@resource[:password])}' -ErrorAction Stop;"
+    end
     cmd = cmd.join
 
     result = self.class.run(cmd)

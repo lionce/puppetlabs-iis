@@ -1,6 +1,7 @@
 ---
 HOSTS:
-  windows2012-64-1:
+  # windows2012-64-1:
+  h9vywgqposr3kmo.delivery.puppetlabs.net:
     pe_dir:
     pe_ver:
     pe_upgrade_dir:

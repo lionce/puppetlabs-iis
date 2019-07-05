@@ -39,7 +39,7 @@ if Puppet::Util::Platform.windows?
               end
 
               version = "#{major_version}.#{minor_version}"
-            rescue Exception
+            rescue StandardError
               version = nil
             end
         version

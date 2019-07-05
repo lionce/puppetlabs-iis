@@ -23,6 +23,9 @@ spec/spec_helper.rb:
   mock_with: ':rspec'
 
 # For the moment don't do any rubocop checks.
+.rubocop.yml:
+  include_todos: true
+#  selected_profile: off
 
 # Includes acceptance_tests rototiller rake task added with MODULES-3373
 Rakefile:
