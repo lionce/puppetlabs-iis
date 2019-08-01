@@ -1,16 +1,15 @@
 require 'spec_helper'
 
 describe Puppet::Type.type(:iis_virtual_directory) do
-  subject { resource }
+  subject(:virtual_dir) { resource }
 
   let(:type_class) { Puppet::Type.type(:iis_virtual_directory) }
-
+  let(:resource) { described_class.new(name: 'iis_virtual_directory') }
   let :params do
     [
       :name,
     ]
   end
-
   let :properties do
     [
       :ensure,
@@ -38,10 +37,8 @@ describe Puppet::Type.type(:iis_virtual_directory) do
     expect(params + [:provider]).to include(*type_class.parameters)
   end
 
-  let(:resource) { described_class.new(name: 'iis_virtual_directory') }
-
   describe 'parameter :name' do
-    subject { resource.parameters[:name] }
+    subject(:virt_dir_name) { resource.parameters[:name] }
 
     it { is_expected.to be_isnamevar }
 
@@ -59,7 +56,7 @@ describe Puppet::Type.type(:iis_virtual_directory) do
   end
 
   describe 'parameter :sitename' do
-    subject { resource.parameters[:name] }
+    # subject(:virt_dir_name) { resource.parameters[:name] }
 
     it 'does not allow nil' do
       expect {
@@ -75,7 +72,7 @@ describe Puppet::Type.type(:iis_virtual_directory) do
   end
 
   describe 'parameter :application' do
-    subject { resource.parameters[:name] }
+    # subject(:virt_dir_name) { resource.parameters[:name] }
 
     it 'does not allow nil' do
       expect {

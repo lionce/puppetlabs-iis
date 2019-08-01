@@ -51,3 +51,7 @@ def beaker_opts
     trace: true,
   }
 end
+
+def define_pool_name
+  SecureRandom.hex(10).to_s
+end

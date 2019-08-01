@@ -13,7 +13,7 @@ AllCops:
   - "**/Gemfile"
   - "**/Rakefile"
   - pkg/**/*
-  - spec/**/**/*
+  - spec/fixtures/**/*
   - vendor/**/*
   - "**/Puppetfile"
   - "**/Vagrantfile"
@@ -118,6 +118,12 @@ RSpec/MultipleExpectations:
   Enabled: false
 RSpec/NestedGroups:
   Enabled: false
+RSpec/EmptyExampleGroup:
+  Enabled: false
+RSpec/FilePath:
+  Enabled: false
+RSpec/NamedSubject:
+  Enabled: false
 Style/AsciiComments:
   Enabled: false
 Style/ClassVars:
@@ -132,9 +138,17 @@ Style/PredicateName:
   Enabled: false
 Style/MultilineTernaryOperator:
   Enabled: false
+Style/AccessorMethodName:
+  Enabled: false
+Style/MultilineBlockChain:
+  Enabled: false
 Lint/AssignmentInCondition:
   Enabled: false
 Lint/IneffectiveAccessModifier:
+  Enabled: false
+Lint/UselessAssignment:
+  Enabled: false
+Lint/UnderscorePrefixedVariableName:
   Enabled: false
 Style/RegexpLiteral:
   Enabled: false

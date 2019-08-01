@@ -38,27 +38,29 @@ describe PuppetX::IIS::PowerShellManager do
     skip 'Powershell version is less than 3.0 or undetermined' unless get_powershell_major_version.to_i >= 3
   end
 
-  let (:manager_args) do
+  let(:manager_args) do
     powershell = PuppetX::IIS::PowerShellCommon.powershell_path
     cli_args = PuppetX::IIS::PowerShellCommon.powershell_args.join(' ')
     "#{powershell} #{cli_args}"
   end
+  let(:manager) { create_manager }
+  let(:powershell_runtime_error) { '$ErrorActionPreference = "Stop";$test = 1/0' }
+  let(:powershell_parseexception_error) { '$ErrorActionPreference = "Stop";if (1 -badoperator 2) { Exit 1 }' }
+  let(:powershell_incompleteparseexception_error) { '$ErrorActionPreference = "Stop";if (1 -eq 2) {  ' }
 
   def create_manager
     PuppetX::IIS::PowerShellManager.instance(manager_args)
   end
-
-  let (:manager) { create_manager }
 
   describe 'when managing the powershell process' do
     describe 'the PowerShellManager::instance method' do
       it 'returns the same manager instance / process given the same cmd line' do
         first_pid = manager.execute('[Diagnostics.Process]::GetCurrentProcess().Id')[:stdout]
 
-        manager_2 = create_manager
-        second_pid = manager_2.execute('[Diagnostics.Process]::GetCurrentProcess().Id')[:stdout]
+        manager2 = create_manager
+        second_pid = manager2.execute('[Diagnostics.Process]::GetCurrentProcess().Id')[:stdout]
 
-        expect(manager_2).to eq(manager)
+        expect(manager2).to eq(manager)
         expect(first_pid).to eq(second_pid)
       end
 
@@ -135,9 +137,9 @@ describe PuppetX::IIS::PowerShellManager do
       def close_stream(stream, style = :inprocess)
         if style == :inprocess
           stream.close
-        else style == :viahandle
-             handle = PuppetX::IIS::WindowsAPI.get_osfhandle(stream.fileno)
-             PuppetX::IIS::WindowsAPI.CloseHandle(handle)
+        elsif style == :viahandle
+          handle = PuppetX::IIS::WindowsAPI.get_osfhandle(stream.fileno)
+          PuppetX::IIS::WindowsAPI.CloseHandle(handle)
         end
       end
 
@@ -252,10 +254,6 @@ describe PuppetX::IIS::PowerShellManager do
     end
   end
 
-  let(:powershell_runtime_error) { '$ErrorActionPreference = "Stop";$test = 1/0' }
-  let(:powershell_parseexception_error) { '$ErrorActionPreference = "Stop";if (1 -badoperator 2) { Exit 1 }' }
-  let(:powershell_incompleteparseexception_error) { '$ErrorActionPreference = "Stop";if (1 -eq 2) {  ' }
-
   describe 'when provided powershell commands' do
     it 'shows ps version' do
       result = manager.execute('$psversiontable')
@@ -366,7 +364,7 @@ describe PuppetX::IIS::PowerShellManager do
       # 2-byte ۿ - http://www.fileformat.info/info/unicode/char/06ff/index.htm - 0xDB 0xBF / 219 191
       # 3-byte ᚠ - http://www.fileformat.info/info/unicode/char/16A0/index.htm - 0xE1 0x9A 0xA0 / 225 154 160
       # 4-byte 𠜎 - http://www.fileformat.info/info/unicode/char/2070E/index.htm - 0xF0 0xA0 0x9C 0x8E / 240 160 156 142
-      let (:mixed_utf8) { "A\u06FF\u16A0\u{2070E}" } # Aۿᚠ𠜎
+      let(:mixed_utf8) { "A\u06FF\u16A0\u{2070E}" } # Aۿᚠ𠜎
 
       it 'when writing basic text' do
         code = "Write-Output '#{mixed_utf8}'"
@@ -561,7 +559,9 @@ $bytes_in_k = (1024 * 64) + 1
       # then command may have \r\n injected, so remove those for comparison
       expect(result[:stdout].gsub(%r{\r\n}, '')).to include(command)
       # and it should end with the Write-Error content
-      expect(result[:stdout]).to end_with("404 Craig Not Found\r\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\r\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException\r\n \r\n")
+      expect(result[:stdout]).to end_with("404 Craig Not Found\r\n    + CategoryInfo          : NotSpecified: (:) " \
+      " [Write-Error], WriteErrorException\r\n    + FullyQualifiedErrorId : "\
+      " Microsoft.PowerShell.Commands.WriteErrorException\r\n \r\n")
     end
 
     it 'does not deadlock and return a valid response given invalid unparseable PowerShell code' do
@@ -693,7 +693,8 @@ $bytes_in_k = (1024 * 64) + 1
       msg = SecureRandom.uuid.to_s.delete('-')
       result = manager.execute("Write-Error '#{msg}'")
 
-      expect(result[:stdout]).to eq("Write-Error '#{msg}' : #{msg}\r\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\r\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException\r\n \r\n")
+      expect(result[:stdout]).to eq("Write-Error '#{msg}' : #{msg}\r\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], "\
+      "WriteErrorException\r\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException\r\n \r\n")
       expect(result[:exitcode]).to eq(0)
     end
 

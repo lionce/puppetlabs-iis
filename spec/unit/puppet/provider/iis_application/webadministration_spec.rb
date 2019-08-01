@@ -2,9 +2,9 @@ require 'spec_helper'
 require 'puppet_x/puppetlabs/iis/powershell_manager'
 
 describe 'iis_application provider' do
-  before :each do
-    expect(PuppetX::IIS::PowerShellManager).not_to receive(:new)
-  end
+  # before :each do
+  #   expect(PuppetX::IIS::PowerShellManager).not_to receive(:new)
+  # end
   subject do
     resource = Puppet::Type.type(:iis_application).new(params)
     resource.provider = Puppet::Type.type(:iis_application).provider(:webadministration).new
@@ -24,6 +24,7 @@ describe 'iis_application provider' do
         { title: 'foo\bar' }
       end
 
+      it { expect(PuppetX::IIS::PowerShellManager).not_to receive(:new) }
       it { expect { subject.create }.to raise_error(RuntimeError, %r{physicalpath}) }
     end
     context 'with nonexistent physicalpath' do
@@ -34,9 +35,8 @@ describe 'iis_application provider' do
         }
       end
 
-      before :each do
-        allow(File).to receive(:exists?).with('C:\noexist').and_return(false)
-      end
+      it { allow(File).to receive(:exists?).with('C:\noexist').and_return(false) }
+      it { expect(PuppetX::IIS::PowerShellManager).not_to receive(:new) }
       it { expect { subject.create }.to raise_error(RuntimeError, %r{doesn't exist}) }
     end
     context 'with existent physicalpath' do
@@ -64,7 +64,7 @@ describe 'iis_application provider' do
     end
 
     before :each do
-      expect(Puppet::Provider::IIS_PowerShell).to receive(:run).with(%r{ConvertTo-WebApplication}).and_return(exitcode: 0)
+      allow(Puppet::Provider::IIS_PowerShell).to receive(:run).with(%r{ConvertTo-WebApplication}).and_return(exitcode: 0)
     end
     it { subject.create }
   end
